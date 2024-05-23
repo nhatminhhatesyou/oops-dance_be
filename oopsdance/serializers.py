@@ -8,15 +8,18 @@ from datetime import time
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'password', 'full_name', 'contact_number', 'role', 'date_of_birth','username')
+        fields = ('email', 'password', 'full_name', 'contact_number', 'role', 'date_of_birth', 'username')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         validated_data.setdefault('role', 'guest')
-        user = User.objects.create_user(**validated_data)
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
         return user
     
 class LoginSerializer(serializers.Serializer):

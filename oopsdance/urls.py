@@ -1,22 +1,22 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    home, RegisterView, LoginView, SignOutView, AddClassView, ClassListView, ClassDetailAPIView,
+    home, RegisterView, LoginView, LogoutView, AddClassView, ClassListView, ClassDetailAPIView,
     ScheduleListView, AddScheduleView, ScheduleDetailAPIView, AddRoomView, RoomListView,
     RoomDetailAPIView, BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView,
     BookingGuestListCreateAPIView, BookingGuestDetailAPIView,
-    RevenueListCreateAPIView, RevenueDetailAPIView, AvailableRoomsAPIView
+    RevenueListCreateAPIView, RevenueDetailAPIView, AvailableRoomsAPIView, test_token
 )
 from . import views
 
-router = DefaultRouter()
+router = DefaultRouter() 
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('register/', RegisterView.as_view(), name='register'),
     path('', views.home, name='home'),
+    path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
-    path('signout/', SignOutView.as_view(), name='signout'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     
     path('add_class/', AddClassView.as_view(), name='add_class'),
     path('class-list/', ClassListView.as_view(), name='class-list'),
@@ -41,6 +41,6 @@ urlpatterns = [
     ## REVENUE ##
     path('revenues/', RevenueListCreateAPIView.as_view(), name='revenue-list-create'),
     path('revenues/<int:pk>/', RevenueDetailAPIView.as_view(), name='revenue-detail'),
-    
+    path('test-token/', test_token, name='test-token'),
     
 ]

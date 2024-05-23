@@ -2,25 +2,53 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
-from django.contrib.auth import login, logout
-from .serializers import UserSerializer, ClassSerializer, LoginSerializer, ScheduleSerializer, RoomSerializer,BookingSerializer, BookingGuestSerializer, BookingStatusSerializer, RevenueSerializer
-from .models import Class, ClassSchedule, Room, Booking, BookingGuest, BookingStatus, Revenue, User
-from django.http import HttpResponse
-from django.db.models import Q
-from django.http import JsonResponse
-
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+    api_view
+)
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import (
+    get_user_model,
+    login,
+    logout,
+    authenticate
+)
 from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from rest_framework.decorators import api_view
-
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from datetime import datetime, time, date, timedelta
+from .serializers import (
+    UserSerializer,
+    ClassSerializer,
+    LoginSerializer,
+    ScheduleSerializer,
+    RoomSerializer,
+    BookingSerializer,
+    BookingGuestSerializer,
+    BookingStatusSerializer,
+    RevenueSerializer
+)
+from .models import (
+    Class,
+    ClassSchedule,
+    Room,
+    Booking,
+    BookingGuest,
+    BookingStatus,
+    Revenue,
+    User
+)
 import qrcode
 import io
+from django.db.models import Q
 
+User = get_user_model()
 
 def home(request):
     return HttpResponse("Welcome to OopsDanceStudio!")
@@ -29,27 +57,58 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            user.set_password(request.data['password'])
+            user.save()
+            token = Token.objects.create(user=user)
+            return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data
-            login(request, user)
-            return Response({"message":"success"}, status=status.HTTP_200_OK)
+            user = authenticate(username=request.data['username'], password=request.data['password'])
+            if user is not None:
+                # Kiểm tra xem người dùng đã có token hay chưa
+                try:
+                    token = Token.objects.get(user=user)
+                    token.delete()  # Xóa token hiện tại
+                except Token.DoesNotExist:
+                    pass
+                
+                token = Token.objects.create(user=user)  # Tạo token mới
+                login(request, user)
+                user_serializer = UserSerializer(user)
+                return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             errors = dict(serializer.errors)
             errors['message'] = "credentials don't match"
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-class SignOutView(APIView):
+class LogoutView(APIView):
+    authentication_classes = [TokenAuthentication]
+
     def post(self, request):
-        logout(request)
-        return Response({"message": "Logout Success!"}, status=status.HTTP_200_OK)
-    
+        try:
+            request.user.auth_token.delete()  # Xóa token hiện tại
+            logout(request)
+            return Response({"message": "Logout success"}, status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "Logout failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    return Response("passed!")
+
+
+
+#################################
+
 class AddClassView(APIView):
     def post(self, request, format=None):
         serializer = ClassSerializer(data=request.data)
