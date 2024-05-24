@@ -2,6 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
+from rest_framework import generics
+from rest_framework.authtoken.views import ObtainAuthToken
+
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -48,62 +52,97 @@ import qrcode
 import io
 from django.db.models import Q
 
+import logging
+
+
 User = get_user_model()
 
 def home(request):
     return HttpResponse("Welcome to OopsDanceStudio!")
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(request.data['password'])
-            user.save()
-            token = Token.objects.create(user=user)
-            return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class RegisterView(APIView):
+#     def post(self, request):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+#             user.set_password(request.data['password'])
+#             user.save()
+#             token = Token.objects.create(user=user)
+#             return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LoginView(APIView):
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = authenticate(username=request.data['username'], password=request.data['password'])
-            if user is not None:
-                # Kiểm tra xem người dùng đã có token hay chưa
-                try:
-                    token = Token.objects.get(user=user)
-                    token.delete()  # Xóa token hiện tại
-                except Token.DoesNotExist:
-                    pass
+# class LoginView(APIView):
+#     def post(self, request):
+#         serializer = LoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = authenticate(username=request.data['username'], password=request.data['password'])
+#             if user is not None:
+#                 # Kiểm tra xem người dùng đã có token hay chưa
+#                 try:
+#                     token = Token.objects.get(user=user)
+#                     token.delete()  # Xóa token hiện tại
+#                 except Token.DoesNotExist:
+#                     pass
                 
-                token = Token.objects.create(user=user)  # Tạo token mới
-                login(request, user)
-                user_serializer = UserSerializer(user)
-                return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            errors = dict(serializer.errors)
-            errors['message'] = "credentials don't match"
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+#                 token = Token.objects.create(user=user)  # Tạo token mới
+#                 login(request, user)
+#                 user_serializer = UserSerializer(user)
+#                 return Response({'token': token.key, 'user': user_serializer.data}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             errors = dict(serializer.errors)
+#             errors['message'] = "credentials don't match"
+#             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class LogoutView(APIView):
+#     authentication_classes = [TokenAuthentication]
+
+#     def post(self, request):
+#         try:
+#             request.user.auth_token.delete()  # Xóa token hiện tại
+#             logout(request)
+#             return Response({"message": "Logout success"}, status=status.HTTP_200_OK)
+#         except:
+#             return Response({"message": "Logout failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class LoginView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super(LoginView, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        return Response({'token': token.key, 'id': token.user_id})
 
 class LogoutView(APIView):
-    authentication_classes = [TokenAuthentication]
+    permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
-        try:
-            request.user.auth_token.delete()  # Xóa token hiện tại
-            logout(request)
-            return Response({"message": "Logout success"}, status=status.HTTP_200_OK)
-        except:
-            return Response({"message": "Logout failed"}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
+logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def test_token(request):
-    return Response("passed!")
+    user = request.user
+    logger.info(f"User: {user}")
+    return Response({
+        'message': 'Token is valid',
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'full_name': user.full_name,
+            'role': user.role,
+        }
+    })
+# def test_token(request):
+#     return Response("passed for {}".format(request.user.email))
 
 
 
