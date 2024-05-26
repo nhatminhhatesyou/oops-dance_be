@@ -14,15 +14,15 @@ class BookingStatusSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BookingSerializer(serializers.ModelSerializer):
-    checkin_time = serializers.TimeField(required=True)
-    checkout_time = serializers.TimeField(required=True)
+    checkin_time = serializers.TimeField(default=time(0, 0), format='%H:%M')
+    checkout_time = serializers.TimeField(default=time(0, 0), format='%H:%M')
     date = serializers.DateField(required=True)
     status_name = serializers.SerializerMethodField()
     room_name = serializers.CharField(write_only=True)
 
     class Meta:
         model = Booking
-        fields = ('guest', 'room', 'room_name', 'checkin_time', 'checkout_time', 'date', 'status', 'status_name')
+        fields = ('id', 'guest', 'room', 'room_name', 'checkin_time', 'checkout_time', 'date', 'status', 'status_name')
         read_only_fields = ('status_name', 'room')
 
     def validate(self, data):

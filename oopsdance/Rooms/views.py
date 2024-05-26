@@ -24,6 +24,7 @@ class AddRoomView(APIView):
             errors = dict(serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])
 class RoomListView(APIView):
     def get(self, request, format=None):
         rooms = Room.objects.all()
