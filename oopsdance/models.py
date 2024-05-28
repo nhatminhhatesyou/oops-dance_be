@@ -141,3 +141,20 @@ class Revenue(models.Model):
     def __str__(self):
         return f"Revenue on {self.date}"
     
+class Attendance(models.Model):
+    STATUS_CHOICES = [
+        ('completed', 'Completed'),
+        ('in_progress', 'In Progress'),
+        ('canceled', 'Canceled'),
+    ]
+
+    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name='Class')
+    instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'instructor'}, verbose_name='Instructor')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Room')
+    date = models.DateField(verbose_name='Date')
+    checkin_time = models.TimeField(verbose_name='Checkin Time')
+    checkout_time = models.TimeField(verbose_name='Checkout Time')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name='Status')
+
+    def __str__(self):
+        return f"Attendance {self.id} - {self.class_instance.class_name} - {self.instructor.full_name} - {self.room.name}"

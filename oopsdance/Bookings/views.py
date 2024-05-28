@@ -25,7 +25,6 @@ class BookingStatusListCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@permission_classes([AllowAny])
 class BookingListCreateAPIView(APIView):
     def get(self, request):
         bookings = Booking.objects.all()
