@@ -27,7 +27,16 @@ class LoginView(ObtainAuthToken):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key, 'id': token.user_id})
+            return Response({
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'email': user.email,
+                    'username': user.username,
+                    'full_name': user.full_name,
+                    'role': user.role,
+                        }
+                })
         else:
             return Response({'message': "credentials don't match"}, status=status.HTTP_401_UNAUTHORIZED)
 
