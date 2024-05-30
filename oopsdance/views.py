@@ -10,7 +10,6 @@ from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
-    api_view
 )
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
