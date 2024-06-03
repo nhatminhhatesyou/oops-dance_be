@@ -1,9 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from django.utils import timezone
 from .serializers import ClassSerializer, ScheduleSerializer
-from oopsdance.models import Class, ClassSchedule
+from ..Attendance.serializers import AttendanceSerializer
+from oopsdance.models import Class, ClassSchedule, Attendance
 
 import datetime
 
@@ -67,22 +69,23 @@ class ClassCountByInstructorView(APIView):
 @permission_classes([AllowAny])
 class ClassesTodayByInstructorView(APIView):
     def get(self, request, instructor_id, format=None):
-        day_of_week_str = str(datetime.datetime.today().weekday())
-        classes_today = Class.objects.filter(
+        today = timezone.localtime().date()
+        classes_today = Attendance.objects.filter(
             instructor_id=instructor_id,
-            schedules__day_of_the_week=day_of_week_str
+            date = today
         ).distinct()
 
-        serializer = ClassSerializer(classes_today, many=True)
+        serializer = AttendanceSerializer(classes_today, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class ClassesToday(APIView):
     def get(self, request, format=None):
-        day_of_week_str = str(datetime.datetime.today().weekday())
-        classes_today = Class.objects.filter(
-            schedules__day_of_the_week=day_of_week_str
+        today = timezone.localtime().date()
+        print(f"Today's date: {today}")
+        classes_today = Attendance.objects.filter(
+            date = today
         ).distinct()
 
-        serializer = ClassSerializer(classes_today, many=True)
+        serializer = AttendanceSerializer(classes_today, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

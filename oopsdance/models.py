@@ -49,6 +49,7 @@ class User(AbstractBaseUser):
 class Room(models.Model):
     name = models.CharField(max_length=255)
     size = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Giá phòng')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -100,12 +101,28 @@ class BookingStatus(models.Model):
         return self.status_name
 
 class Booking(models.Model):
+    DEPOSIT_STATUS_CHOICES = [
+        ('waiting', 'Waiting'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Phòng')
     guest = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Khách hàng')
     status = models.ForeignKey(BookingStatus, on_delete=models.CASCADE, verbose_name='Trạng thái đặt chỗ', default=1)
     date = models.DateField(verbose_name='Ngày', default=timezone.now)
     checkin_time = models.TimeField(verbose_name='Thời gian check-in', default=datetime.time(0, 0))
     checkout_time = models.TimeField(verbose_name='Thời gian check-out', default=datetime.time(0, 0))
+    deposite = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền đặt cọc')
+    bank_transfer = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Chuyển khoản')
+    cash = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền mặt')
+    details = models.TextField(null=True, blank=True, verbose_name='Chi tiết')
+    deposite_status = models.CharField(
+        max_length=10,
+        choices=DEPOSIT_STATUS_CHOICES,
+        default='waiting',
+        verbose_name='Trạng thái đặt cọc'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -143,8 +160,10 @@ class Revenue(models.Model):
     
 class Attendance(models.Model):
     STATUS_CHOICES = [
+        ('pending', 'Pending'),
         ('completed', 'Completed'),
         ('in_progress', 'In Progress'),
+        ('waiting', 'Waiting'),
         ('canceled', 'Canceled'),
     ]
 
@@ -152,8 +171,8 @@ class Attendance(models.Model):
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'instructor'}, verbose_name='Instructor')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Room')
     date = models.DateField(verbose_name='Date')
-    checkin_time = models.TimeField(verbose_name='Checkin Time')
-    checkout_time = models.TimeField(verbose_name='Checkout Time')
+    checkin_time = models.TimeField(verbose_name='Checkin Time', null=True, blank=True)
+    checkout_time = models.TimeField(verbose_name='Checkout Time', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name='Status')
 
     def __str__(self):

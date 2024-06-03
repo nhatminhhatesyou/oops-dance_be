@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from oopsdance.models import Attendance
+from datetime import time
 
 # Import Serializers
 from ..Classes.serializers import ClassSerializer
@@ -16,12 +17,9 @@ class AttendanceSerializer(serializers.ModelSerializer):
     room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), source='room', required=True)
     room_detail = RoomSerializer(source='room', read_only=True)
     status = serializers.ChoiceField(choices=Attendance.STATUS_CHOICES)
+    checkin_time = serializers.TimeField(default=time(0, 0), format='%H:%M')
+    checkout_time = serializers.TimeField(default=time(0, 0), format='%H:%M')
 
     class Meta:
         model = Attendance
         fields = ('id', 'class_instance_id', 'class_instance_detail', 'instructor_id', 'instructor_detail', 'room_id', 'room_detail', 'date', 'checkin_time', 'checkout_time', 'status')
-
-    def validate(self, data):
-        if data['checkin_time'] >= data['checkout_time']:
-            raise serializers.ValidationError("Checkout time must be after checkin time.")
-        return data

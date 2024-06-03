@@ -51,7 +51,7 @@ from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, tes
 from oopsdance.Classes.views import AddClassView, ClassListView, ClassDetailAPIView, ScheduleListView, AddScheduleView, ScheduleDetailAPIView, ClassCountByInstructorView, ClassesTodayByInstructorView, ClassesToday
 from oopsdance.Rooms.views import AddRoomView, RoomListView, RoomDetailAPIView, AvailableRoomsAPIView
 from oopsdance.Bookings.views import BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView, BookingGuestListCreateAPIView, BookingGuestDetailAPIView, RevenueListCreateAPIView, RevenueDetailAPIView
-from oopsdance.Attendance.views import AttendanceCountByInstructorView
+from oopsdance.Attendance.views import AttendanceCountByInstructorView, AttendanceListView, AttendanceRecordsByInstructorView, AttendanceDetailAPIView
 
 router = DefaultRouter()
 
@@ -70,7 +70,7 @@ urlpatterns = [
     path('add_schedule/', AddScheduleView.as_view(), name='add_schedule'),
     path('schedule/<int:pk>/', ScheduleDetailAPIView.as_view(), name='schedule-detail'),
     path('class_count_by_instructor/<int:instructor_id>/', ClassCountByInstructorView.as_view(), name='class-count-by-instructor'),
-    path('classes_today/', ClassesToday.as_view(), name='classes-today-by-instructor'),
+    path('classes_today/', ClassesToday.as_view(), name='classes-today'),
     path('classes_today/<int:instructor_id>/', ClassesTodayByInstructorView.as_view(), name='classes-today-by-instructor'),
 
     # Rooms
@@ -90,6 +90,11 @@ urlpatterns = [
     
     #Attendance
     path('attendance_count_by_instructor/<int:instructor_id>/', AttendanceCountByInstructorView.as_view(), name='attendance-count-by-instructor'),
+    path('attendance-list/', AttendanceListView.as_view(), name='attendance-list'),
+    path('attendance-list/<int:instructor_id>', AttendanceRecordsByInstructorView.as_view(), name='attendance-list-by-instructor-list'),
+    path('attendance/<int:pk>/', AttendanceDetailAPIView.as_view(), name='attendance-detail'),
+    
+    
 ]
 
 urlpatterns += router.urls
