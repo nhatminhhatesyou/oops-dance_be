@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, test_token
+from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, test_token, UserRetrieveUpdateDestroyAPIView
 from oopsdance.Classes.views import AddClassView, ClassListView, ClassDetailAPIView, ScheduleListView, AddScheduleView, ScheduleDetailAPIView, ClassCountByInstructorView, ClassesTodayByInstructorView, ClassesToday
 from oopsdance.Rooms.views import AddRoomView, RoomListView, RoomDetailAPIView, AvailableRoomsAPIView
 from oopsdance.Bookings.views import BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView, BookingGuestListCreateAPIView, BookingGuestDetailAPIView, RevenueListCreateAPIView, RevenueDetailAPIView
@@ -15,6 +15,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('test-token/', test_token, name='test-token'),
+    path('users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-detail-update-delete'),
     
     # Classes
     path('add_class/', AddClassView.as_view(), name='add_class'),

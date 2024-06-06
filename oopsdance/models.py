@@ -34,7 +34,8 @@ class User(AbstractBaseUser):
     full_name = models.CharField(max_length=150, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, blank=True)
-
+    avatar = CloudinaryField('image', blank=True, null=True)
+    
     objects = UserManager()
 
     USERNAME_FIELD = 'email'

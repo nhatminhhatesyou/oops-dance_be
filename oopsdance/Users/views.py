@@ -14,8 +14,14 @@ import logging
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
-def home(request):
+def home(request): 
     return HttpResponse("Welcome to OopsDanceStudio!")
+
+@permission_classes([AllowAny])
+class UserRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
