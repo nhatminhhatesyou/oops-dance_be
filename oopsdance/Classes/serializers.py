@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from datetime import time
-from oopsdance.models import Class, ClassSchedule, Room
+from oopsdance.models import Class, ClassSchedule, Room, ClassStudent
 from ..Rooms.serializers import RoomSerializer
 from ..Users.serializers import UserSerializer
 from django.contrib.auth import get_user_model
@@ -40,10 +40,12 @@ class ClassSerializer(serializers.ModelSerializer):
     schedules = ClassScheduleSerializer(many=True, read_only=True)
     room_id = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all(), source='room', required=False)
     room_detail = RoomSerializer(source='room', read_only=True)
+    student_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
+    students = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Class
-        fields = ('id', 'class_name', 'instructor_id', 'price', 'instructor_detail', 'schedules', 'schedules_ids', 'room_id', 'room_detail')
+        fields = ('id', 'class_name', 'instructor_id', 'price', 'instructor_detail', 'schedules', 'schedules_ids', 'room_id', 'room_detail', 'student_ids', 'students','class_lesson','image')
 
     def validate(self, data):
         existing_class = Class.objects.filter(class_name=data.get('class_name')).first()
@@ -55,12 +57,27 @@ class ClassSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         schedules_ids = validated_data.pop('schedules_ids', [])
+        student_ids = validated_data.pop('student_ids', [])
         class_instance = Class.objects.create(**validated_data)
         class_instance.schedules.set(schedules_ids)
+        for student_id in student_ids:
+            ClassStudent.objects.create(class_instance=class_instance, user_id=student_id)
         return class_instance
 
     def update(self, instance, validated_data):
-        schedules_ids = validated_data.pop('schedules_ids', None)
-        if schedules_ids is not None:
+        request = self.context.get('request')
+        schedules_ids = request.data.getlist('schedules_ids')  # Retrieve list of schedule IDs
+        student_ids = validated_data.pop('student_ids', None)
+        image = validated_data.pop('image', None)  # Handle the image separately
+
+        if schedules_ids:
             instance.schedules.set(schedules_ids)
+        if student_ids is not None:
+            instance.students.clear()
+            for student_id in student_ids:
+                ClassStudent.objects.create(class_instance=instance, user_id=student_id)
+        
+        if image:
+            instance.image = image
+        
         return super().update(instance, validated_data)

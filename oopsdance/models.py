@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from cloudinary.models import CloudinaryField
 
 import datetime
 
@@ -29,7 +30,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True, null=True, blank=True)
     email = models.EmailField(max_length=255, unique=True)
-    role = models.CharField(max_length=10, choices=(('instructor', 'Instructor'), ('student', 'Student'), ('staff', 'Staff'), ('guest', 'Guest')), blank=True)
+    role = models.CharField(max_length=10, choices=(('instructor', 'Instructor'), ('staff', 'Staff'), ('guest', 'Guest')), blank=True)
     full_name = models.CharField(max_length=150, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, blank=True)
@@ -61,7 +62,10 @@ class Class(models.Model):
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'instructor'}, verbose_name='Giáo viên')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Giá')
     schedules = models.ManyToManyField('ClassSchedule', verbose_name='Lịch học', blank=True)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Phòng', null=True, blank=True)  # Thêm trường này
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Phòng', null=True, blank=True)
+    students = models.ManyToManyField(User, through='ClassStudent', related_name='student_classes', limit_choices_to={'role': 'guest'}, verbose_name='Học viên')
+    class_lesson = models.CharField(max_length=255, blank=True)
+    image = CloudinaryField('image', blank=True, null=True)
 
     def __str__(self):
         return self.class_name
@@ -82,6 +86,14 @@ class ClassSchedule(models.Model):
 
     def __str__(self):
         return f"{self.get_day_of_the_week_display()} from {self.start_time.strftime('%H:%M')} to {self.end_time.strftime('%H:%M')}"
+    
+class ClassStudent(models.Model):
+    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date_joined = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} in {self.class_instance.class_name}"
     
 class FixedRental(models.Model):
     date = models.DateField()  # Ngày

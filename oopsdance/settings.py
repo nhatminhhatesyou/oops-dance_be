@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
+from urllib.parse import urlparse
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,6 +42,8 @@ INSTALLED_APPS = [
     'oopsdance',
     'corsheaders',
     'rest_framework.authtoken',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -169,3 +172,18 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0, day_of_week='monday'),
     },
 }
+
+# Cloudinary settings
+CLOUDINARY_URL ='cloudinary://345892296591293:D8uFZQk1gnAJyjcNL8xdm6I_m5A@dqgu13tbd'
+
+if CLOUDINARY_URL:
+    url = urlparse(CLOUDINARY_URL)
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': url.hostname,
+        'API_KEY': url.username,
+        'API_SECRET': url.password
+    }
+else:
+    raise ValueError("Must supply CLOUDINARY_URL")
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

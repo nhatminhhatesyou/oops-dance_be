@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from .serializers import ClassSerializer, ScheduleSerializer
 from ..Attendance.serializers import AttendanceSerializer
@@ -25,16 +26,22 @@ class AddClassView(APIView):
         else:
             errors = dict(serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+@permission_classes([AllowAny])
 class ClassListView(APIView):
     def get(self, request, format=None):
-        classes = Class.objects.all()
+        instructor_id = request.query_params.get('instructor_id', None)
+        if instructor_id is not None:
+            classes = Class.objects.filter(instructor_id=instructor_id)
+        else:
+            classes = Class.objects.all()
         serializer = ClassSerializer(classes, many=True)
         return Response(serializer.data)
     
 class ClassDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Class.objects.all()
     serializer_class = ClassSerializer
+    parser_classes = (MultiPartParser, FormParser) 
     
 class ScheduleListView(APIView):
     def get(self, request, format=None):

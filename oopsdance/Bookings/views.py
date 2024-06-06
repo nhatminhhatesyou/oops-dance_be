@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
     permission_classes
 )
-
+# status
 class BookingStatusListCreateAPIView(APIView):
     def get(self, request):
         statuses = BookingStatus.objects.all()
@@ -25,10 +25,15 @@ class BookingStatusListCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# list
 @permission_classes([AllowAny])
 class BookingListCreateAPIView(APIView):
     def get(self, request):
-        bookings = Booking.objects.all()
+        guest_id = request.query_params.get('guest_id', None)
+        if guest_id is not None:
+            bookings = Booking.objects.filter(guest_id=guest_id)
+        else:
+            bookings = Booking.objects.all()
         serializer = BookingSerializer(bookings, many=True)
         return Response(serializer.data)
 
@@ -41,6 +46,7 @@ class BookingListCreateAPIView(APIView):
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])
 class BookingDetailAPIView(APIView):
     def get_object(self, pk):
         try:
@@ -72,6 +78,7 @@ class BookingDetailAPIView(APIView):
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# booking guest
 class BookingGuestListCreateAPIView(APIView):
     def get(self, request):
         guests = BookingGuest.objects.all()
