@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model, authenticate, login, logout
+from rest_framework.generics import ListAPIView
 from django.http import HttpResponse
 from .serializers import UserSerializer
 import logging
@@ -69,3 +70,9 @@ def test_token(request):
             'role': user.role,
         }
     })
+    
+@permission_classes([AllowAny])
+class InstructorListView(ListAPIView):
+    queryset = User.objects.filter(role='instructor')
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]

@@ -7,8 +7,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         today = datetime.date.today()
-        start_of_week = today + datetime.timedelta(days=(7 - today.weekday()))  # Next Monday
-        end_of_week = start_of_week + datetime.timedelta(days=6)  # Following Sunday
+        # start_of_week = today + datetime.timedelta(days=(7 - today.weekday()))  # Next Monday
+        # end_of_week = start_of_week + datetime.timedelta(days=6)  # Following Sunday
+        
+        start_of_week = today - datetime.timedelta(days=today.weekday())  # This Monday
+        end_of_week = start_of_week + datetime.timedelta(days=6)  # This Sunday
+
 
         classes = Class.objects.all()
         for class_instance in classes:

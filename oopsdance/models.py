@@ -126,11 +126,11 @@ class Booking(models.Model):
     date = models.DateField(verbose_name='Ngày', default=timezone.now)
     checkin_time = models.TimeField(verbose_name='Thời gian check-in', default=datetime.time(0, 0))
     checkout_time = models.TimeField(verbose_name='Thời gian check-out', default=datetime.time(0, 0))
-    deposite = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền đặt cọc')
+    deposit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền đặt cọc')
     bank_transfer = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Chuyển khoản')
     cash = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền mặt')
     details = models.TextField(null=True, blank=True, verbose_name='Chi tiết')
-    deposite_status = models.CharField(
+    deposit_status = models.CharField(
         max_length=10,
         choices=DEPOSIT_STATUS_CHOICES,
         default='waiting',
@@ -187,6 +187,9 @@ class Attendance(models.Model):
     checkin_time = models.TimeField(verbose_name='Checkin Time', null=True, blank=True)
     checkout_time = models.TimeField(verbose_name='Checkout Time', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name='Status')
-
+    checkin_proof = CloudinaryField('image', blank=True, null=True)
+    checkout_proof = CloudinaryField('image', blank=True, null=True)
+    details = models.TextField(null=True, blank=True, verbose_name='Chi tiết')
+    
     def __str__(self):
         return f"Attendance {self.id} - {self.class_instance.class_name} - {self.instructor.full_name} - {self.room.name}"

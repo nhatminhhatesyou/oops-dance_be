@@ -22,7 +22,7 @@ class AddAttendanceView(APIView):
             errors = dict(serializer.errors)
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
  
-# @permission_classes([AllowAny])   
+@permission_classes([AllowAny])   
 class AttendanceListView(APIView):
     def get(self, request, format=None):
         attendance_records = Attendance.objects.all()
@@ -43,7 +43,7 @@ class AttendanceCountByInstructorView(APIView):
         except Attendance.DoesNotExist:
             return Response({"error": "Instructor not found"}, status=status.HTTP_404_NOT_FOUND)
 
-# @permission_classes([AllowAny])
+@permission_classes([AllowAny])
 class AttendanceRecordsByInstructorView(APIView):
     def get(self, request, instructor_id, format=None):
         attendance_records = Attendance.objects.filter(instructor_id=instructor_id)

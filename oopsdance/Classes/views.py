@@ -42,7 +42,8 @@ class ClassDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Class.objects.all()
     serializer_class = ClassSerializer
     parser_classes = (MultiPartParser, FormParser) 
-    
+
+@permission_classes([AllowAny])
 class ScheduleListView(APIView):
     def get(self, request, format=None):
         schedule = ClassSchedule.objects.all()

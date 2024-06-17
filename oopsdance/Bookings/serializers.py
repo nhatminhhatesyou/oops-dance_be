@@ -2,6 +2,8 @@ from rest_framework import serializers
 from datetime import time
 from oopsdance.models import Booking, BookingGuest, BookingStatus, Revenue, Room
 from ..Rooms.serializers import RoomSerializer
+from ..Users.serializers import UserSerializer
+
 
 class RevenueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,11 +21,12 @@ class BookingSerializer(serializers.ModelSerializer):
     date = serializers.DateField(required=True)
     status_name = serializers.SerializerMethodField()
     room_name = serializers.CharField(write_only=True)
+    guest_detail = UserSerializer(source='guest',read_only=True)
 
     class Meta:
         model = Booking
-        fields = ('id', 'guest', 'room', 'room_name', 'checkin_time', 'checkout_time', 'date', 'status', 'status_name','deposite','bank_transfer','cash','details','deposite_status')
-        read_only_fields = ('status_name', 'room')
+        fields = ('id', 'guest_id', 'room_id', 'room_name', 'checkin_time', 'checkout_time', 'date', 'status', 'status_name','deposit','bank_transfer','cash','details','deposit_status','guest_detail')
+        read_only_fields = ('status_name', 'room','guest_detail')
 
     def validate(self, data):
         if data['checkin_time'] >= data['checkout_time']:
