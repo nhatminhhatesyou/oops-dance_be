@@ -119,3 +119,19 @@ class AvailableRoomsAPIView(APIView):
                 available_time_slots[room.name] = [(slot[0].strftime("%H:%M"), slot[1].strftime("%H:%M")) for slot in available_time_slots_for_room]
 
         return Response(available_time_slots, status=status.HTTP_200_OK)
+    
+    
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdateRoomView(APIView):
+    def patch(self, request, pk, format=None):
+        try:
+            room = Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            return Response({"error": "Room not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = RoomSerializer(room, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

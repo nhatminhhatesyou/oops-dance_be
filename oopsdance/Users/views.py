@@ -73,6 +73,12 @@ def test_token(request):
     
 @permission_classes([AllowAny])
 class InstructorListView(ListAPIView):
-    queryset = User.objects.filter(role='instructor')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = User.objects.filter(role='instructor')
+        instructor_id = self.request.query_params.get('id', None)
+        if instructor_id is not None:
+            queryset = queryset.filter(id=instructor_id)
+        return queryset

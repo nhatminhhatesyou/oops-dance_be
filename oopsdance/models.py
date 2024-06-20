@@ -51,7 +51,7 @@ class User(AbstractBaseUser):
 class Room(models.Model):
     name = models.CharField(max_length=255)
     size = models.CharField(max_length=50)
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Giá phòng')
+    price = models.IntegerField(verbose_name='Giá phòng')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -120,13 +120,15 @@ class Booking(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Phòng')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name='Phòng') 
     guest = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Khách hàng')
     status = models.ForeignKey(BookingStatus, on_delete=models.CASCADE, verbose_name='Trạng thái đặt chỗ', default=1)
     date = models.DateField(verbose_name='Ngày', default=timezone.now)
     checkin_time = models.TimeField(verbose_name='Thời gian check-in', default=datetime.time(0, 0))
     checkout_time = models.TimeField(verbose_name='Thời gian check-out', default=datetime.time(0, 0))
     deposit = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền đặt cọc')
+    full_payment = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tổng tiền phải trả')
+    real_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Số tiền thực thu')
     bank_transfer = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Chuyển khoản')
     cash = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Tiền mặt')
     details = models.TextField(null=True, blank=True, verbose_name='Chi tiết')
@@ -177,7 +179,7 @@ class Attendance(models.Model):
         ('completed', 'Completed'),
         ('in_progress', 'In Progress'),
         ('waiting', 'Waiting'),
-        ('canceled', 'Canceled'),
+        ('cancelled', 'Cancelled'),
     ]
 
     class_instance = models.ForeignKey(Class, on_delete=models.CASCADE, verbose_name='Class')

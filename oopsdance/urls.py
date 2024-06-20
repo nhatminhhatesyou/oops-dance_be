@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, test_token, UserRetrieveUpdateDestroyAPIView, InstructorListView
 from oopsdance.Classes.views import AddClassView, ClassListView, ClassDetailAPIView, ScheduleListView, AddScheduleView, ScheduleDetailAPIView, ClassCountByInstructorView, ClassesTodayByInstructorView, ClassesToday
-from oopsdance.Rooms.views import AddRoomView, RoomListView, RoomDetailAPIView, AvailableRoomsAPIView
+from oopsdance.Rooms.views import AddRoomView, RoomListView, RoomDetailAPIView, AvailableRoomsAPIView, UpdateRoomView
 from oopsdance.Bookings.views import BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView, BookingGuestListCreateAPIView, BookingGuestDetailAPIView, RevenueListCreateAPIView, RevenueDetailAPIView
 from oopsdance.Attendance.views import AttendanceCountByInstructorView, AttendanceListView, AttendanceRecordsByInstructorView, AttendanceDetailAPIView
 from oopsdance.TaskView.views import run_update_attendance_task
@@ -36,6 +36,7 @@ urlpatterns = [
     path('add-room/', AddRoomView.as_view(), name='add-room'),
     path('rooms/', RoomListView.as_view(), name='room-list'),
     path('rooms/<int:pk>/', RoomDetailAPIView.as_view(), name='room-detail'),
+    path('rooms/<int:pk>/update/', UpdateRoomView.as_view(), name='update-room'),
     path('available-rooms/', AvailableRoomsAPIView.as_view(), name='available-rooms'),
 
     # Bookings
