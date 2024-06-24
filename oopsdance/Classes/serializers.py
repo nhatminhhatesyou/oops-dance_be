@@ -45,7 +45,7 @@ class ClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Class
-        fields = ('id', 'class_name', 'instructor_id', 'price', 'instructor_detail', 'schedules', 'schedules_ids', 'room_id', 'room_detail', 'student_ids', 'students','class_lesson','image')
+        fields = ('id', 'class_name', 'instructor_id', 'price', 'instructor_detail', 'schedules', 'schedules_ids', 'room_id', 'room_detail', 'student_ids', 'students', 'class_lesson', 'image')
 
     def validate(self, data):
         existing_class = Class.objects.filter(class_name=data.get('class_name')).first()
@@ -73,11 +73,17 @@ class ClassSerializer(serializers.ModelSerializer):
         if schedules_ids:
             instance.schedules.set(schedules_ids)
         if student_ids is not None:
-            instance.students.clear()
+            current_student_ids = set(instance.students.values_list('id', flat=True))
             for student_id in student_ids:
-                ClassStudent.objects.create(class_instance=instance, user_id=student_id)
+                if student_id not in current_student_ids:
+                    ClassStudent.objects.create(class_instance=instance, user_id=student_id)
         
         if image:
             instance.image = image
         
         return super().update(instance, validated_data)
+    
+class ClassSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Class
+        fields = ['class_name', 'image']

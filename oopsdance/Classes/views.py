@@ -6,7 +6,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from .serializers import ClassSerializer, ScheduleSerializer
 from ..Attendance.serializers import AttendanceSerializer
-from oopsdance.models import Class, ClassSchedule, Attendance
+from oopsdance.models import Class, ClassSchedule, Attendance, User
 
 import datetime
 
@@ -31,17 +31,45 @@ class AddClassView(APIView):
 class ClassListView(APIView):
     def get(self, request, format=None):
         instructor_id = request.query_params.get('instructor_id', None)
+        guest_id = request.query_params.get('guest_id', None)
+
         if instructor_id is not None:
             classes = Class.objects.filter(instructor_id=instructor_id)
+        elif guest_id is not None:
+            classes = Class.objects.filter(students__id=guest_id)
         else:
             classes = Class.objects.all()
+            
         serializer = ClassSerializer(classes, many=True)
         return Response(serializer.data)
-    
+
+@permission_classes([AllowAny])
 class ClassDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Class.objects.all()
     serializer_class = ClassSerializer
-    parser_classes = (MultiPartParser, FormParser) 
+    parser_classes = (MultiPartParser, FormParser)
+    
+class RemoveStudentFromClassView(APIView):
+    def patch(self, request, pk, format=None):
+        try:
+            class_instance = Class.objects.get(pk=pk)
+        except Class.DoesNotExist:
+            return Response({'error': 'Class not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        student_id = request.data.get('student_id')
+        if not student_id:
+            return Response({'error': 'Student ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            student = User.objects.get(pk=student_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if student not in class_instance.students.all():
+            return Response({'error': 'Student is not in this class'}, status=status.HTTP_400_BAD_REQUEST)
+
+        class_instance.students.remove(student)
+        return Response({'message': 'Student removed successfully'}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class ScheduleListView(APIView):
@@ -90,10 +118,8 @@ class ClassesTodayByInstructorView(APIView):
 class ClassesToday(APIView):
     def get(self, request, format=None):
         today = timezone.localtime().date()
-        print(f"Today's date: {today}")
         classes_today = Attendance.objects.filter(
-            date = today
-        ).distinct()
+            date=today
+        ).values_list('class_instance_id', flat=True).distinct()
 
-        serializer = AttendanceSerializer(classes_today, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(list(classes_today), status=status.HTTP_200_OK)

@@ -12,18 +12,30 @@ from django.http import HttpResponse
 from .serializers import UserSerializer
 import logging
 
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import (
+    permission_classes
+)
+
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 def home(request): 
     return HttpResponse("Welcome to OopsDanceStudio!")
 
-@permission_classes([AllowAny])
+@permission_classes([AllowAny])   
 class UserRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+  
+@permission_classes([AllowAny])   
+class UserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
+@permission_classes([AllowAny])   
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -59,7 +71,6 @@ class LogoutView(APIView):
 @permission_classes([IsAuthenticated])
 def test_token(request):
     user = request.user
-    logger.info(f"User: {user}")
     return Response({
         'message': 'Token is valid',
         'user': {
@@ -68,6 +79,7 @@ def test_token(request):
             'username': user.username,
             'full_name': user.full_name,
             'role': user.role,
+            'avatar_url': user.avatar.url if user.avatar else None
         }
     })
     

@@ -192,6 +192,25 @@ class Attendance(models.Model):
     checkin_proof = CloudinaryField('image', blank=True, null=True)
     checkout_proof = CloudinaryField('image', blank=True, null=True)
     details = models.TextField(null=True, blank=True, verbose_name='Chi tiết')
-    
+
+    class Meta:
+        ordering = ['-date']  # Sort by date in descending order
+
     def __str__(self):
         return f"Attendance {self.id} - {self.class_instance.class_name} - {self.instructor.full_name} - {self.room.name}"
+    
+class StudentAttendance(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('absent', 'Absent'),
+        ('attend', 'Attend'),
+    ]
+
+    date = models.DateField()
+    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=7, choices=STATUS_CHOICES, default='pending')
+    details = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.student.full_name} - {self.class_instance.class_name} - {self.date}"

@@ -7,12 +7,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         today = datetime.date.today()
-        # start_of_week = today + datetime.timedelta(days=(7 - today.weekday()))  # Next Monday
-        # end_of_week = start_of_week + datetime.timedelta(days=6)  # Following Sunday
-        
         start_of_week = today - datetime.timedelta(days=today.weekday())  # This Monday
         end_of_week = start_of_week + datetime.timedelta(days=6)  # This Sunday
-
 
         classes = Class.objects.all()
         for class_instance in classes:
@@ -35,7 +31,13 @@ class Command(BaseCommand):
                     )
                     if created:
                         self.stdout.write(self.style.SUCCESS(f'Created attendance for {class_instance} on {class_date}'))
+                        completion_message = 'Attendance update completed'
+                        
                     else:
                         self.stdout.write(self.style.WARNING(f'Attendance already exists for {class_instance} on {class_date}'))
+                        completion_message = 'Attendance already exists'
+                        
 
-        self.stdout.write(self.style.SUCCESS('Attendance update completed'))
+        self.stdout.write(self.style.SUCCESS(completion_message))
+
+        return completion_message
