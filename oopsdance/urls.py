@@ -60,8 +60,8 @@ urlpatterns = [
     path('student-attendance/', AddStudentAttendanceView.as_view(), name='add-student-attendance'),
     path('student-attendance-list/', StudentAttendanceListView.as_view(), name='student-attendance-list'),
     path('student-attendance/<int:pk>/', StudentAttendanceDetailAPIView.as_view(), name='student-attendance-detail'),
-    path('student-attendance-count/<int:class_id>/', AttendanceCountByStudentView.as_view(), name='student-attendance-count'),
-    path('student-attendance-records/<int:class_id>/', AttendanceRecordsByStudentView.as_view(), name='student-attendance-records'),
+    path('student-attendance-count/<int:student_id>/', AttendanceCountByStudentView.as_view(), name='student-attendance-count'),
+    path('student-attendance-records/<int:student_id>/', AttendanceRecordsByStudentView.as_view(), name='student-attendance-records'),
     path('today-student-attendance/', TodayStudentAttendanceListView.as_view(), name='today-student-attendance'),
     
     #Celery
