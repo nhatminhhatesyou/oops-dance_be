@@ -54,6 +54,8 @@ class LoginView(ObtainAuthToken):
                     'username': user.username,
                     'full_name': user.full_name,
                     'role': user.role,
+                    'date_of_birth': user.date_of_birth,
+                    'avatar_url': user.avatar.url if user.avatar else None
                         }
                 })
         else:
@@ -79,6 +81,7 @@ def test_token(request):
             'username': user.username,
             'full_name': user.full_name,
             'role': user.role,
+            'date_of_birth': user.date_of_birth,
             'avatar_url': user.avatar.url if user.avatar else None
         }
     })
