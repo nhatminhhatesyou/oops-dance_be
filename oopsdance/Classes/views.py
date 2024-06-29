@@ -4,9 +4,10 @@ from rest_framework import status
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
-from .serializers import ClassSerializer, ScheduleSerializer
+from django.db.models import Count
+from .serializers import ClassSerializer, ScheduleSerializer, TotalStudentCountSerializer
 from ..Attendance.serializers import AttendanceSerializer
-from oopsdance.models import Class, ClassSchedule, Attendance, User
+from oopsdance.models import Class, ClassSchedule, Attendance, User, ClassStudent
 
 import datetime
 
@@ -70,6 +71,16 @@ class RemoveStudentFromClassView(APIView):
 
         class_instance.students.remove(student)
         return Response({'message': 'Student removed successfully'}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
+class TotalStudentCountView(APIView):
+    def get(self, request, format=None):
+        total_student_count = ClassStudent.objects.aggregate(total_student_count=Count('user'))['total_student_count']
+        data = {
+            'total_student_count': total_student_count
+        }
+        serializer = TotalStudentCountSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class ScheduleListView(APIView):

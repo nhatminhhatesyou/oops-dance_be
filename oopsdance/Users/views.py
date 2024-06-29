@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from rest_framework.generics import ListAPIView
 from django.http import HttpResponse
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ChangePasswordSerializer
 import logging
 
 from rest_framework.permissions import AllowAny
@@ -67,6 +67,23 @@ class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
+
+@permission_classes([IsAuthenticated])
+class ChangePasswordView(APIView):
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+
+        if not user.check_password(data.get('old_password')):
+            return Response({"detail": "Old password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if data.get('new_password') != data.get('confirm_password'):
+            return Response({"detail": "New passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(data.get('new_password'))
+        user.save()
+
+        return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])

@@ -82,7 +82,10 @@ class ClassSerializer(serializers.ModelSerializer):
             instance.image = image
         
         return super().update(instance, validated_data)
-    
+
+class TotalStudentCountSerializer(serializers.Serializer):
+    total_student_count = serializers.IntegerField()
+        
 class ClassSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Class

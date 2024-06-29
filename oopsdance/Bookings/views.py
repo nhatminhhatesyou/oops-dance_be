@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, timedelta, date, time
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from .serializers import BookingSerializer, BookingGuestSerializer, BookingStatusSerializer, RevenueSerializer
 from oopsdance.models import Booking, BookingGuest, BookingStatus, Revenue, Room, Class
@@ -78,6 +79,19 @@ class BookingDetailAPIView(APIView):
         booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@permission_classes([AllowAny])
+class MonthlyBookingCountView(APIView):
+    def get(self, request, format=None):
+        now = timezone.now()
+        current_month = now.month
+        current_year = now.year
+
+        bookings_this_month = Booking.objects.filter(
+            date__year=current_year,
+            date__month=current_month
+        ).count()
+
+        return Response({'monthly_booking_count': bookings_this_month}, status=status.HTTP_200_OK)
 # booking guest
 class BookingGuestListCreateAPIView(APIView):
     def get(self, request):

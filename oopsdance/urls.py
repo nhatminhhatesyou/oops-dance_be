@@ -1,10 +1,10 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, test_token, UserRetrieveUpdateDestroyAPIView, InstructorListView, UserListCreateAPIView
-from oopsdance.Classes.views import AddClassView, ClassListView, ClassDetailAPIView, ScheduleListView, AddScheduleView, ScheduleDetailAPIView, ClassCountByInstructorView, ClassesTodayByInstructorView, ClassesToday, RemoveStudentFromClassView
+from oopsdance.Users.views import home, RegisterView, LoginView, LogoutView, test_token, UserRetrieveUpdateDestroyAPIView, InstructorListView, UserListCreateAPIView, ChangePasswordView
+from oopsdance.Classes.views import AddClassView, ClassListView, ClassDetailAPIView, ScheduleListView, AddScheduleView, ScheduleDetailAPIView, ClassCountByInstructorView, ClassesTodayByInstructorView, ClassesToday, RemoveStudentFromClassView, TotalStudentCountView
 from oopsdance.Rooms.views import AddRoomView, RoomListView, RoomDetailAPIView, AvailableRoomsAPIView, UpdateRoomView
-from oopsdance.Bookings.views import BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView, BookingGuestListCreateAPIView, BookingGuestDetailAPIView, RevenueListCreateAPIView, RevenueDetailAPIView
+from oopsdance.Bookings.views import BookingStatusListCreateAPIView, BookingListCreateAPIView, BookingDetailAPIView, BookingGuestListCreateAPIView, BookingGuestDetailAPIView, RevenueListCreateAPIView, RevenueDetailAPIView, MonthlyBookingCountView
 from oopsdance.Attendance.views import AttendanceCountByInstructorView, AttendanceListView, AttendanceRecordsByInstructorView, AttendanceDetailAPIView, StudentAttendanceDetailAPIView, AddStudentAttendanceView, StudentAttendanceListView, AttendanceCountByStudentView, AttendanceRecordsByStudentView, TodayStudentAttendanceListView
 from oopsdance.TaskView.views import run_update_attendance_task, update_student_attendance_view
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('test-token/', test_token, name='test-token'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     
     #Users
     path('users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-detail-update-delete'),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('class_count_by_instructor/<int:instructor_id>/', ClassCountByInstructorView.as_view(), name='class-count-by-instructor'),
     path('classes_today/', ClassesToday.as_view(), name='classes-today'),
     path('classes_today/<int:instructor_id>/', ClassesTodayByInstructorView.as_view(), name='classes-today-by-instructor'),
+    path('total-student-count/', TotalStudentCountView.as_view(), name='total-student-count'),
 
     # Rooms
     path('add-room/', AddRoomView.as_view(), name='add-room'),
@@ -47,6 +49,7 @@ urlpatterns = [
     path('bookings/<int:pk>/', BookingDetailAPIView.as_view(), name='booking-detail'),
     path('booking-guests/', BookingGuestListCreateAPIView.as_view(), name='booking-guest-list-create'),
     path('booking-guests/<int:pk>/', BookingGuestDetailAPIView.as_view(), name='booking-guest-detail'),
+    path('monthly-booking-count/', MonthlyBookingCountView.as_view(), name='monthly-booking-count'),
     path('revenues/', RevenueListCreateAPIView.as_view(), name='revenue-list-create'),
     path('revenues/<int:pk>/', RevenueDetailAPIView.as_view(), name='revenue-detail'),
     
